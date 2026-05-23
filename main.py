@@ -52,8 +52,40 @@ with header_col2:
     3. **Launch the Simulation:** Run the RK45 physics engine and the Kalman Filter sequentially to generate telemetry.
     4. **Analyze the Data:** Use the **Visibility Toggles** in the sidebar to isolate specific data layers in the 3D viewer. 
     """)
+# --- KALMAN FILTER MATHEMATICAL BREAKDOWN ---
+st.markdown("### 🧮 The Mathematics of Estimation: The Kalman Filter")
+math_col1, math_col2 = st.columns([1, 1])
+
+with math_col1:
+    st.markdown("""
+    At its core, a Kalman Filter is an optimal estimation algorithm. It doesn't just smooth data; it runs a continuous, real-time cycle of **prediction** and **correction** by combining a physical model with incoming sensor measurements.
+    
+    The filter maintains a state vector $\hat{x}$ (position and velocity) and an uncertainty covariance matrix $P$ (how much we trust our current estimate). 
+    
+    **Step 1: The Prediction Phase (Physics Engine)**
+    Before a sensor even takes a reading, the flight computer propagates the state forward using our structural transition matrix $F$ (derived from our orbital dynamics equations):
+    """)
+    st.latex(r"\hat{x}_{k \mid k-1} = F_k \hat{x}_{k-1 \mid k-1}")
+    st.latex(r"P_{k \mid k-1} = F_k P_{k-1 \mid k-1} F_k^T + Q_k")
+    st.markdown("Where $Q$ represents **Process Noise**—the physical uncertainties like atmospheric drag or unmodeled gravitational anomalies.")
+
+with math_col2:
+    st.markdown("""
+    **Step 2: The Correction Phase (Sensor Measurement)**
+    When a noisy hardware sensor delivers a telemetry packet $z_k$, the filter calculates the **Kalman Gain ($K$)**. This value acts as a mathematical scale between 0 and 1 to determine who to trust more: our physics model or our hardware.
+    """)
+    st.latex(r"K_k = P_{k \mid k-1} H_k^T (H_k P_{k \mid k-1} H_k^T + R_k)^{-1}")
+    st.markdown("""
+    Where $R$ is the **Measurement Noise Covariance** (configured by your sidebar noise slider). 
+    * If sensor noise ($R$) is high, $K$ drops, and the filter heavily trusts the **physics engine**.
+    * If sensor noise ($R$) is low, $K$ increases, and the filter heavily trusts the **hardware**.
+    
+    Finally, the state is updated to yield the optimal estimate:
+    """)
+    st.latex(r"\hat{x}_{k \mid k} = \hat{x}_{k \mid k-1} + K_k (z_k - H_k \hat{x}_{k \mid k-1})")
 
 st.markdown("---")
+
 
 # --- SIDEBAR CONTROLS ---
 st.sidebar.header("🎛️ Mission Parameters")
